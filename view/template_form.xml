@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!-- This file is part of Tryton.  The COPYRIGHT file at the top level of
+this repository contains the full copyright notices and license terms. -->
+<data>
+    <xpath
+        expr="/form/notebook/page[@id='general']"
+        position="after">
+        <page string="Accounting" col="4" id="accounting">
+            <separator string="Taxes" id="taxes" colspan="4"/>
+            <label name="taxes_category"/>
+            <field name="taxes_category"/>
+            <newline/>
+            <label name="taxes"/>
+            <field name="taxes"/>
+        </page>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='list_price']"
+            position="after">
+        <label name="list_price_with_tax"/>
+        <field name="list_price_with_tax"/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='cost_price']"
+            position="after">
+        <label name="cost_price_with_tax"/>
+        <field name="cost_price_with_tax"/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='cost_price_with_tax']"
+            position="after">
+        <label name="total"/>
+        <field name="total"/>
+    </xpath>
+</data>

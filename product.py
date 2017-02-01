@@ -75,6 +75,14 @@ class Template:
             Eval('taxes_category', False))
         cls.category.depends.extend(['taxes_category'])
 
+    @staticmethod
+    def default_default_uom():
+        Uom = Pool().get('product.uom')
+        uoms = Uom.search([('symbol', '=', 'u'), ('name', '=', 'Unidad')])
+        if len(uoms) >= 1:
+            for uom in uoms:
+                return uom.id
+
     def get_list_price_with_tax(self):
         if self.list_price:
             impuesto = 'iva0'

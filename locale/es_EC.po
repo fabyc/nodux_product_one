@@ -76,7 +76,7 @@ msgstr ""
 
 msgctxt "view:product.category:"
 msgid "Accounting"
-msgstr "Contabilidad"
+msgstr "Impuestos"
 
 msgctxt "view:product.category:"
 msgid "Taxes"
@@ -88,7 +88,7 @@ msgstr "Productos"
 
 msgctxt "view:product.template:"
 msgid "Accounting"
-msgstr "Contabilidad"
+msgstr "Impuestos"
 
 msgctxt "view:product.template:"
 msgid "Taxes"

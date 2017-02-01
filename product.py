@@ -109,6 +109,7 @@ class Template:
         return changes
 
     def get_list_price(self):
+        impuesto = 'iva0'
         if self.taxes_category and not self.category:
             return None
         if self.taxes_category and self.category:
@@ -170,6 +171,7 @@ class Template:
         return changes
 
     def get_cost_price(self):
+        impuesto = 'iva0'
         if self.taxes_category and not self.category:
             return None
         if self.taxes_category and self.category:

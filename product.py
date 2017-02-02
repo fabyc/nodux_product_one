@@ -51,6 +51,7 @@ class Template:
         help='Use the taxes defined on the category')
 
     taxes = fields.Selection([
+        ('', ''),
         ('iva0','IVA 0%'),
         ('no_iva', 'No aplica impuesto'),
         ('iva12', 'IVA 12%'),

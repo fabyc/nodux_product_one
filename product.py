@@ -254,12 +254,6 @@ class Product:
 
     @staticmethod
     def get_sale_price(products, quantity=0):
-        '''
-        Return the sale price for products and quantity.
-        It uses if exists from the context:
-            uom: the unit of measure
-            currency: the currency id for the returned price
-        '''
         pool = Pool()
         Uom = pool.get('product.uom')
         User = pool.get('res.user')
@@ -281,6 +275,41 @@ class Product:
 
         for product in products:
             prices[product.id] = product.list_price
+            if uom:
+                prices[product.id] = Uom.compute_price(
+                    product.default_uom, prices[product.id], uom)
+            if currency and user.company:
+                if user.company.currency != currency:
+                    date = Transaction().context.get('sale_date') or today
+                    with Transaction().set_context(date=date):
+                        prices[product.id] = Currency.compute(
+                            user.company.currency, prices[product.id],
+                            currency, round=False)
+        return prices
+
+    @staticmethod
+    def get_purchase_price(products, quantity=0):
+        pool = Pool()
+        Uom = pool.get('product.uom')
+        User = pool.get('res.user')
+        Currency = pool.get('currency.currency')
+        Date = pool.get('ir.date')
+
+        today = Date.today()
+        prices = {}
+
+        uom = None
+        if Transaction().context.get('uom'):
+            uom = Uom(Transaction().context.get('uom'))
+
+        currency = None
+        if Transaction().context.get('currency'):
+            currency = Currency(Transaction().context.get('currency'))
+
+        user = User(Transaction().user)
+
+        for product in products:
+            prices[product.id] = product.cost_price
             if uom:
                 prices[product.id] = Uom.compute_price(
                     product.default_uom, prices[product.id], uom)

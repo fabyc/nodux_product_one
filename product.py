@@ -66,7 +66,7 @@ class Template:
     cost_price_with_tax = fields.Property(fields.Numeric('Cost Price With Tax',
             states=STATES, digits=(16, DIGITS), depends=DEPENDS)
             )
-    total = fields.Integer('Total Products')
+    total = fields.Integer('Total Products', readonly=True)
 
     @classmethod
     def __setup__(cls):

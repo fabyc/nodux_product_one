@@ -75,6 +75,7 @@ class Template:
             cls.category.states.get('required', False),
             Eval('taxes_category', False))
         cls.category.depends.extend(['taxes_category'])
+        cls.name.size = 100
 
     @staticmethod
     def default_default_uom():
@@ -252,6 +253,11 @@ class Template:
 class Product:
     __name__ = 'product.product'
 
+    @classmethod
+    def __setup__(cls):
+        super(Product, cls).__setup__()
+        cls.code.size = 50
+        
     @staticmethod
     def get_sale_price(products, quantity=0):
         pool = Pool()

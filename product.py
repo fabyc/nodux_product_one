@@ -1,5 +1,3 @@
-#This file is part of Tryton.  The COPYRIGHT file at the top level of
-#this repository contains the full copyright notices and license terms.
 import datetime
 
 from trytond.pool import Pool, PoolMeta
@@ -76,6 +74,16 @@ class Template:
             Eval('taxes_category', False))
         cls.category.depends.extend(['taxes_category'])
         cls.name.size = 100
+
+    @fields.depends('name')
+    def on_change_name(self):
+        res = {}
+        cont = 0
+        if self.name:
+            name = self.name.strip()
+            name = name.replace("\n","")
+            res['name'] = name
+        return res
 
     @staticmethod
     def default_default_uom():
@@ -257,7 +265,26 @@ class Product:
     def __setup__(cls):
         super(Product, cls).__setup__()
         cls.code.size = 50
-        
+
+    @fields.depends('code')
+    def on_change_code(self):
+        res = {}
+        cont = 0
+        if self.code:
+            code = self.code.strip()
+            code = code.replace("\n","")
+            res['code'] = code
+        return res
+
+    @fields.depends('description')
+    def on_change_description(self):
+        res = {}
+        cont = 0
+        if self.description:
+            description = self.description.strip()
+            res['description'] = description
+        return res
+
     @staticmethod
     def get_sale_price(products, quantity=0):
         pool = Pool()

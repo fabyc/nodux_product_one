@@ -86,6 +86,10 @@ class Template:
         return res
 
     @staticmethod
+    def default_total():
+        return 0
+
+    @staticmethod
     def default_default_uom():
         Uom = Pool().get('product.uom')
         uoms = Uom.search([('symbol', '=', 'u'), ('name', '=', 'Unidad')])

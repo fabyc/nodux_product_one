@@ -29,6 +29,15 @@ this repository contains the full copyright notices and license terms. -->
         <label name="total"/>
         <field name="total"/>
     </xpath>
+    <xpath expr="/form/notebook/page/field[@name='total']"
+            position="after">
+        <field name="code1" invisible="1"/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='code1']"
+            position="after">
+        <field name="code2" invisible="1"/>
+        <newline/>
+    </xpath>
     <xpath expr="/form/notebook/page/label[@name='consumable']"
       position="replace">
       <newline/>

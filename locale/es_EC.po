@@ -10,6 +10,14 @@ msgctxt "field:product.category,taxes_parent:"
 msgid "Use the Parent's Taxes"
 msgstr "Usar los impuestos del Padre"
 
+msgctxt "field:product.template,code1:"
+msgid "Code"
+msgstr "Código"
+
+msgctxt "field:product.template,code2:"
+msgid "Code"
+msgstr "Código"
+
 msgctxt "field:product.template,cost_price_with_tax:"
 msgid "Cost Price With Tax"
 msgstr "Precio de Costo con Impuestos"
@@ -56,6 +64,10 @@ msgstr ""
 
 msgctxt "selection:product.category,taxes:"
 msgid "No aplica impuesto"
+msgstr ""
+
+msgctxt "selection:product.template,taxes:"
+msgid ""
 msgstr ""
 
 msgctxt "selection:product.template,taxes:"

@@ -66,6 +66,10 @@ class Template:
             )
     total = fields.Integer('Total Products', readonly=True)
 
+    code1 = fields.Char('Code')
+
+    code2 = fields.Char('Code')
+
     @classmethod
     def __setup__(cls):
         super(Template, cls).__setup__()
@@ -83,6 +87,21 @@ class Template:
             name = self.name.strip()
             name = name.replace("\n","")
             res['name'] = name
+        return res
+
+    @fields.depends('products')
+    def on_change_products(self):
+        print "Ingresa ", self.products
+        res = {}
+        cont = 0
+        if self.products:
+            for product in self.products:
+                if cont == 0:
+                    res['code1'] = product.code
+                if cont == 1:
+                    res['code2'] = product.code
+                cont += 1
+        print "Valor res ", res
         return res
 
     @staticmethod

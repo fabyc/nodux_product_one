@@ -73,6 +73,10 @@ class Template:
     @classmethod
     def __setup__(cls):
         super(Template, cls).__setup__()
+        cls._sql_constraints += [
+            ('name', 'UNIQUE(name)',
+                'Product already exists'),
+        ]
         cls.category.states['required'] = Or(
             cls.category.states.get('required', False),
             Eval('taxes_category', False))
@@ -108,7 +112,6 @@ class Template:
 
     @fields.depends('products')
     def on_change_products(self):
-        print "Ingresa ", self.products
         res = {}
         cont = 0
         if self.products:
@@ -118,7 +121,6 @@ class Template:
                 if cont == 1:
                     res['code2'] = product.code
                 cont += 1
-        print "Valor res ", res
         return res
 
     @staticmethod

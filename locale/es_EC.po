@@ -2,6 +2,10 @@
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
 
+msgctxt "error:product.template:"
+msgid "Product already exists"
+msgstr "Producto ya existe"
+
 msgctxt "field:product.category,taxes:"
 msgid "Tax"
 msgstr "Impuesto"

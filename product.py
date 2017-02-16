@@ -79,6 +79,23 @@ class Template:
         cls.category.depends.extend(['taxes_category'])
         cls.name.size = 100
 
+    @classmethod
+    def delete(cls, templates):
+        pool = Pool()
+        SaleLine = pool.get('sale.line')
+        PurchaseLine = pool.get('purchase.line')
+        lines = None
+        purchase_lines = None
+        for template in templates:
+            for product in template.products:
+                lines = SaleLine.search([('product', '=', product )])
+                purchase_lines = PurchaseLine.search([('product', '=', product )])
+                if lines:
+                    cls.raise_user_error('No puede eliminar el producto\n%s\nporque tiene asociada una venta' , (template.name))
+                if purchase_lines:
+                    cls.raise_user_error('No puede eliminar el producto\n%s\nporque tiene asociada una compra', (template.name))
+        super(Template, cls).delete(templates)
+
     @fields.depends('name')
     def on_change_name(self):
         res = {}

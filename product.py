@@ -92,8 +92,8 @@ class Template:
         purchase_lines = None
         for template in templates:
             for product in template.products:
-                lines = SaleLine.search([('product', '=', product )])
-                purchase_lines = PurchaseLine.search([('product', '=', product )])
+                lines = SaleLine.search([('product', '=', product)])
+                purchase_lines = PurchaseLine.search([('product', '=', product)])
                 if lines:
                     cls.raise_user_error('No puede eliminar el producto\n%s\nporque tiene asociada una venta' , (template.name))
                 if purchase_lines:
@@ -110,17 +110,21 @@ class Template:
             res['name'] = name
         return res
 
+    @staticmethod
+    def default_products():
+        return []
+
     @fields.depends('products')
     def on_change_products(self):
         res = {}
         cont = 0
-        if self.products:
-            for product in self.products:
-                if cont == 0:
+        for product in self.products:
+            if cont == 0:
+                if product.code:
                     res['code1'] = product.code
-                if cont == 1:
+            if cont == 1:
+                if product.code:
                     res['code2'] = product.code
-                cont += 1
         return res
 
     @staticmethod
@@ -313,9 +317,10 @@ class Product:
         res = {}
         cont = 0
         if self.code:
-            code = self.code.strip()
-            code = code.replace("\n","")
-            res['code'] = code
+            if self.code != "":
+                code = self.code.strip()
+                code = code.replace("\n","")
+                res['code'] = code
         return res
 
     @fields.depends('description')

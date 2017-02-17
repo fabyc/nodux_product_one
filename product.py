@@ -110,6 +110,22 @@ class Template:
             res['name'] = name
         return res
 
+    @classmethod
+    def search_rec_name(cls, name, clause):
+        products = cls.search([
+                ('code1',) + tuple(clause[1:]),
+                ], limit=1)
+        if products:
+            return [('code1',) + tuple(clause[1:])]
+
+        products2 = cls.search([
+                ('code2',) + tuple(clause[1:]),
+                ], limit=1)
+        if products2:
+            return [('code2',) + tuple(clause[1:])]
+
+        return [('name',) + tuple(clause[1:])]
+
     @staticmethod
     def default_products():
         return []

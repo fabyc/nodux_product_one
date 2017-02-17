@@ -16,11 +16,11 @@ msgstr "Usar los impuestos del Padre"
 
 msgctxt "field:product.template,code1:"
 msgid "Code"
-msgstr "Código"
+msgstr "Código 1"
 
 msgctxt "field:product.template,code2:"
 msgid "Code"
-msgstr "Código"
+msgstr "Código 2"
 
 msgctxt "field:product.template,cost_price_with_tax:"
 msgid "Cost Price With Tax"

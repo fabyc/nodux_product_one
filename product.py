@@ -141,6 +141,7 @@ class Template:
             if cont == 1:
                 if product.code:
                     res['code2'] = product.code
+            cont += 1
         return res
 
     @staticmethod

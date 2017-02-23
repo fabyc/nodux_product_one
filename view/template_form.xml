@@ -14,6 +14,14 @@ this repository contains the full copyright notices and license terms. -->
             <field name="taxes"/>
         </page>
     </xpath>
+    <xpath expr="/form/notebook/page/field[@name='default_uom']"
+            position="after">
+        <newline/>
+        <label name="category"/>
+        <field name="category"/>
+        <newline/>
+    </xpath>
+
     <xpath expr="/form/notebook/page/field[@name='list_price']"
             position="after">
         <label name="list_price_with_tax"/>
@@ -28,5 +36,32 @@ this repository contains the full copyright notices and license terms. -->
             position="after">
         <label name="total"/>
         <field name="total"/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='total']"
+            position="after">
+        <field name="code1" invisible="1"/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='code1']"
+            position="after">
+        <field name="code2" invisible="1"/>
+        <newline/>
+    </xpath>
+    <xpath expr="/form/notebook/page/label[@name='consumable']"
+      position="replace">
+      <newline/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='consumable']"
+      position="replace">
+    </xpath>
+    <xpath expr="/form/notebook/page/label[@name='cost_price_method']"
+      position="replace">
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='cost_price_method']"
+      position="replace">
+      <field name="cost_price_method" invisible="1"/>
+    </xpath>
+    <xpath expr="/form/notebook/page/field[@name='categories']"
+            position="replace">
+      <field name="categories" invisible="1"/>
     </xpath>
 </data>

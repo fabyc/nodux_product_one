@@ -1,14 +1,12 @@
-#This file is part of Tryton.  The COPYRIGHT file at the top level of
-#this repository contains the full copyright notices and license terms.
 import datetime
 
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
-from trytond.model import ModelSQL, fields
 from trytond.pyson import Eval, Or
 from trytond import backend
 from decimal import Decimal
 from trytond.config import config
+from trytond.model import ModelView, ModelSQL, fields, Unique
 
 __all__ = ['Product', 'Category', 'Template']
 __metaclass__ = PoolMeta
@@ -17,7 +15,6 @@ STATES = {
     'readonly': ~Eval('active', True),
     }
 DEPENDS = ['active']
-DIGITS = int(config.get('digits', 'unit_price_digits', 4))
 
 class Category:
     __name__ = 'product.category'
@@ -47,10 +44,14 @@ class Category:
 class Template:
     __name__ = 'product.template'
 
+    category = fields.Many2One('product.category', 'Category',
+        states=STATES, depends=DEPENDS)
+
     taxes_category = fields.Boolean('Use Category\'s Taxes',
         help='Use the taxes defined on the category')
 
     taxes = fields.Selection([
+        ('', ''),
         ('iva0','IVA 0%'),
         ('no_iva', 'No aplica impuesto'),
         ('iva12', 'IVA 12%'),
@@ -60,20 +61,98 @@ class Template:
         })
 
     list_price_with_tax = fields.Property(fields.Numeric('List Price With Tax',
-            states=STATES, digits=(16, DIGITS), depends=DEPENDS)
+            states=STATES, digits=(16, 4), depends=DEPENDS)
             )
     cost_price_with_tax = fields.Property(fields.Numeric('Cost Price With Tax',
-            states=STATES, digits=(16, DIGITS), depends=DEPENDS)
+            states=STATES, digits=(16, 4), depends=DEPENDS)
             )
-    total = fields.Integer('Total Products')
+    total = fields.Integer('Total Products', readonly=True)
+
+    code1 = fields.Char('Code')
+
+    code2 = fields.Char('Code')
 
     @classmethod
     def __setup__(cls):
         super(Template, cls).__setup__()
+        t = cls.__table__()
+        cls._sql_constraints = [
+            ('NAME', Unique(t, t.name),
+             'Product already exists.')
+        ]
         cls.category.states['required'] = Or(
             cls.category.states.get('required', False),
             Eval('taxes_category', False))
-        cls.category.depends.extend(['taxes_category'])
+        cls.name.size = 100
+
+    @classmethod
+    def delete(cls, templates):
+        pool = Pool()
+        SaleLine = pool.get('sale.line')
+        PurchaseLine = pool.get('purchase.line')
+        lines = None
+        purchase_lines = None
+        for template in templates:
+            for product in template.products:
+                lines = SaleLine.search([('product', '=', product)])
+                purchase_lines = PurchaseLine.search([('product', '=', product)])
+                if lines:
+                    cls.raise_user_error('No puede eliminar el producto\n%s\nporque tiene asociada una venta' , (template.name))
+                if purchase_lines:
+                    cls.raise_user_error('No puede eliminar el producto\n%s\nporque tiene asociada una compra', (template.name))
+        super(Template, cls).delete(templates)
+
+    @fields.depends('name')
+    def on_change_name(self):
+        cont = 0
+        if self.name:
+            name = self.name.strip()
+            name = name.replace("\n","")
+            self.name = name
+
+    @classmethod
+    def search_rec_name(cls, name, clause):
+        products = cls.search([
+                ('code1',) + tuple(clause[1:]),
+                ], limit=1)
+        if products:
+            return [('code1',) + tuple(clause[1:])]
+
+        products2 = cls.search([
+                ('code2',) + tuple(clause[1:]),
+                ], limit=1)
+        if products2:
+            return [('code2',) + tuple(clause[1:])]
+
+        return [('name',) + tuple(clause[1:])]
+
+    @staticmethod
+    def default_products():
+        return []
+
+    @fields.depends('products')
+    def on_change_products(self):
+        cont = 0
+        for product in self.products:
+            cont += 1
+            print "Ingresa ", cont
+            if cont == 1:
+                self.code1 = product.code
+            if cont == 2:
+                self.code2 = product.code
+
+
+    @staticmethod
+    def default_total():
+        return 0
+
+    @staticmethod
+    def default_default_uom():
+        Uom = Pool().get('product.uom')
+        uoms = Uom.search([('symbol', '=', 'u'), ('name', '=', 'Unidad')])
+        if len(uoms) >= 1:
+            for uom in uoms:
+                return uom.id
 
     def get_list_price_with_tax(self):
         if self.list_price:
@@ -98,17 +177,17 @@ class Template:
             return self.list_price + tax_amount
 
     @fields.depends('taxes_category', 'category', 'list_price',
-        'taxes')
+        'taxes', 'list_price_with_tax')
     def on_change_list_price(self):
         try:
-            changes = super(Template, self).on_change_list_price()
+            super(Template, self).on_change_list_price()
         except AttributeError:
-            changes = {}
+            pass
         if self.list_price:
-            changes['list_price_with_tax'] = self.get_list_price_with_tax()
-        return changes
+            self.list_price_with_tax = self.get_list_price_with_tax()
 
     def get_list_price(self):
+        impuesto = 'iva0'
         if self.taxes_category and not self.category:
             return None
         if self.taxes_category and self.category:
@@ -126,15 +205,13 @@ class Template:
         else:
             value = Decimal(1.0)+Decimal(0.0)
         tax_amount = self.list_price_with_tax / value
-        return tax_amount.quantize(Decimal(str(10.0 ** -DIGITS)))
+        return tax_amount.quantize(Decimal(str(10.0 ** -4)))
 
     @fields.depends('taxes_category', 'category', 'list_price_with_tax',
-        'taxes')
+        'taxes', 'list_price')
     def on_change_list_price_with_tax(self):
-        changes = {}
         if self.list_price_with_tax:
-            changes['list_price'] = self.get_list_price()
-        return changes
+            self.list_price = self.get_list_price()
 
     def get_cost_price_with_tax(self):
         if self.cost_price:
@@ -159,17 +236,17 @@ class Template:
             return self.cost_price + tax_amount
 
     @fields.depends('taxes_category', 'category', 'cost_price',
-        'taxes')
+        'taxes', 'cost_price_with_tax')
     def on_change_cost_price(self):
         try:
-            changes = super(Template, self).on_change_cost_price()
+            super(Template, self).on_change_cost_price()
         except AttributeError:
-            changes = {}
+            pass
         if self.cost_price:
-            changes['cost_price_with_tax'] = self.get_cost_price_with_tax()
-        return changes
+            self.cost_price_with_tax = self.get_cost_price_with_tax()
 
     def get_cost_price(self):
+        impuesto = 'iva0'
         if self.taxes_category and not self.category:
             return None
         if self.taxes_category and self.category:
@@ -187,68 +264,78 @@ class Template:
         else:
             value = Decimal(1.0)+Decimal(0.0)
         tax_amount = self.cost_price_with_tax / value
-        return tax_amount.quantize(Decimal(str(10.0 ** -DIGITS)))
+        return tax_amount.quantize(Decimal(str(10.0 ** -4)))
 
     @fields.depends('taxes_category', 'category', 'cost_price_with_tax',
-        'taxes')
+        'taxes', 'cost_price')
     def on_change_cost_price_with_tax(self):
-        changes = {}
         if self.cost_price_with_tax:
-            changes['cost_price'] = self.get_cost_price()
-        return changes
+            self.cost_price = self.get_cost_price()
 
     @fields.depends('taxes_category', 'category', 'list_price', 'cost_price',
-        'taxes')
+        'taxes', 'list_price_with_tax', 'cost_price_with_tax')
     def on_change_taxes_category(self):
         try:
-            changes = super(Template, self).on_change_taxes_category()
+            super(Template, self).on_change_taxes_category()
         except AttributeError:
-            changes = {}
+            pass
         if self.list_price:
-            changes['list_price_with_tax'] = self.get_list_price_with_tax()
+            self.list_price_with_tax = self.get_list_price_with_tax()
         if self.cost_price:
-            changes['cost_price_with_tax'] = self.get_cost_price_with_tax()
-        return changes
+            self.cost_price_with_tax = self.get_cost_price_with_tax()
 
     @fields.depends('taxes_category', 'list_price', 'cost_price',
-        'taxes')
+        'taxes', 'list_price_with_tax', 'cost_price_with_tax')
     def on_change_taxes(self):
         try:
-            changes = super(Template, self).on_change_taxes_category()
+            super(Template, self).on_change_taxes_category()
         except AttributeError:
-            changes = {}
+            pass
         if self.list_price:
-            changes['list_price_with_tax'] = self.get_list_price_with_tax()
+            self.list_price_with_tax = self.get_list_price_with_tax()
         if self.cost_price:
-            changes['cost_price_with_tax'] = self.get_cost_price_with_tax()
-        return changes
+            self.cost_price_with_tax = self.get_cost_price_with_tax()
 
     @fields.depends('taxes_category', 'category', 'list_price', 'cost_price',
-        'taxes')
+        'taxes', 'list_price_with_tax', 'cost_price_with_tax')
     def on_change_category(self):
         try:
-            changes = super(Template, self).on_change_category()
+            super(Template, self).on_change_category()
         except AttributeError:
-            changes = {}
+            pass
         if self.taxes_category:
-            changes['list_price_with_tax'] = None
-            changes['cost_price_with_tax'] = None
+            self.list_price_with_tax = None
+            self.cost_price_with_tax = None
             if self.category:
-                changes['list_price_with_tax'] = self.get_list_price_with_tax()
-                changes['cost_price_with_tax'] = self.get_cost_price_with_tax()
-        return changes
+                self.list_price_with_tax = self.get_list_price_with_tax()
+                self.cost_price_with_tax = self.get_cost_price_with_tax()
 
 class Product:
     __name__ = 'product.product'
 
+    @classmethod
+    def __setup__(cls):
+        super(Product, cls).__setup__()
+        cls.code.size = 50
+
+    @fields.depends('code')
+    def on_change_code(self):
+        cont = 0
+        if self.code:
+            if self.code != "":
+                code = self.code.strip()
+                code = code.replace("\n","")
+                self.code = code
+
+    @fields.depends('description')
+    def on_change_description(self):
+        cont = 0
+        if self.description:
+            description = self.description.strip()
+            self.description = description
+
     @staticmethod
     def get_sale_price(products, quantity=0):
-        '''
-        Return the sale price for products and quantity.
-        It uses if exists from the context:
-            uom: the unit of measure
-            currency: the currency id for the returned price
-        '''
         pool = Pool()
         Uom = pool.get('product.uom')
         User = pool.get('res.user')
@@ -269,7 +356,43 @@ class Product:
         user = User(Transaction().user)
 
         for product in products:
-            prices[product.id] = product.list_price
+            if product:
+                prices[product.id] = product.list_price
+                if uom:
+                    prices[product.id] = Uom.compute_price(
+                        product.default_uom, prices[product.id], uom)
+                if currency and user.company:
+                    if user.company.currency != currency:
+                        date = Transaction().context.get('sale_date') or today
+                        with Transaction().set_context(date=date):
+                            prices[product.id] = Currency.compute(
+                                user.company.currency, prices[product.id],
+                                currency, round=False)
+        return prices
+
+    @staticmethod
+    def get_purchase_price(products, quantity=0):
+        pool = Pool()
+        Uom = pool.get('product.uom')
+        User = pool.get('res.user')
+        Currency = pool.get('currency.currency')
+        Date = pool.get('ir.date')
+
+        today = Date.today()
+        prices = {}
+
+        uom = None
+        if Transaction().context.get('uom'):
+            uom = Uom(Transaction().context.get('uom'))
+
+        currency = None
+        if Transaction().context.get('currency'):
+            currency = Currency(Transaction().context.get('currency'))
+
+        user = User(Transaction().user)
+
+        for product in products:
+            prices[product.id] = product.cost_price
             if uom:
                 prices[product.id] = Uom.compute_price(
                     product.default_uom, prices[product.id], uom)

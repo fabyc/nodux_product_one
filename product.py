@@ -315,9 +315,8 @@ class Template:
             changes = {}
 
         if self.category:
-            changes['account_category'] = True
             changes['taxes_category'] = True
-            
+
         if self.taxes_category:
             changes['list_price_with_tax'] = None
             changes['cost_price_with_tax'] = None

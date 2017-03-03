@@ -313,12 +313,18 @@ class Template:
             changes = super(Template, self).on_change_category()
         except AttributeError:
             changes = {}
+
+        if self.category:
+            changes['account_category'] = True
+            changes['taxes_category'] = True
+            
         if self.taxes_category:
             changes['list_price_with_tax'] = None
             changes['cost_price_with_tax'] = None
             if self.category:
                 changes['list_price_with_tax'] = self.get_list_price_with_tax()
                 changes['cost_price_with_tax'] = self.get_cost_price_with_tax()
+
         return changes
 
 class Product:

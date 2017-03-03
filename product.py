@@ -297,18 +297,25 @@ class Template:
             self.cost_price_with_tax = self.get_cost_price_with_tax()
 
     @fields.depends('taxes_category', 'category', 'list_price', 'cost_price',
-        'taxes', 'list_price_with_tax', 'cost_price_with_tax')
+        'taxes', 'list_price_with_tax', 'cost_price_with_tax',
+        'account_category', 'taxes_category')
     def on_change_category(self):
         try:
             super(Template, self).on_change_category()
         except AttributeError:
             pass
+
+        if self.category:
+            self.account_category = True
+            self.taxes_category = True
+
         if self.taxes_category:
             self.list_price_with_tax = None
             self.cost_price_with_tax = None
             if self.category:
                 self.list_price_with_tax = self.get_list_price_with_tax()
                 self.cost_price_with_tax = self.get_cost_price_with_tax()
+
 
 class Product:
     __name__ = 'product.product'

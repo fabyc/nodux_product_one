@@ -66,7 +66,7 @@ class Template:
     cost_price_with_tax = fields.Property(fields.Numeric('Cost Price With Tax',
             states=STATES, digits=(16, 4), depends=DEPENDS)
             )
-    total = fields.Property(fields.Numeric('Total Products', digits=(16, 8)))
+    total = fields.Property(fields.Numeric('Total Products',readonly=True, digits=(16, 8)))
 
     code1 = fields.Char('Code')
 

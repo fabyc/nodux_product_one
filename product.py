@@ -133,9 +133,10 @@ class Template:
     @fields.depends('products')
     def on_change_products(self):
         cont = 0
+        self.code1 = None
+        self.code2 = None
         for product in self.products:
             cont += 1
-            print "Ingresa ", cont
             if cont == 1:
                 self.code1 = product.code
             if cont == 2:

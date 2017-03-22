@@ -343,10 +343,12 @@ class Product:
     @staticmethod
     def get_sale_price(products, quantity=0):
         pool = Pool()
+        PriceList = pool.get('product.price_list')
         Uom = pool.get('product.uom')
         User = pool.get('res.user')
         Currency = pool.get('currency.currency')
         Date = pool.get('ir.date')
+        context = Transaction().context
 
         today = Date.today()
         prices = {}
@@ -360,10 +362,13 @@ class Product:
             currency = Currency(Transaction().context.get('currency'))
 
         user = User(Transaction().user)
-
         for product in products:
             if product:
                 prices[product.id] = product.list_price
+                if context.get('price_list'):
+                    price_list = PriceList(Transaction().context['price_list'])
+                    price = price_list.compute(product, prices[product.id], quantity, uom)
+                    prices[product.id] = price
                 if uom:
                     prices[product.id] = Uom.compute_price(
                         product.default_uom, prices[product.id], uom)
@@ -375,6 +380,8 @@ class Product:
                                 user.company.currency, prices[product.id],
                                 currency, round=False)
         return prices
+
+
 
     @staticmethod
     def get_purchase_price(products, quantity=0):

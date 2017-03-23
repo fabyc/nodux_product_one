@@ -83,19 +83,4 @@ this repository contains the full copyright notices and license terms. -->
       position="replace">
       <field name="categories" invisible="1"/>
     </xpath>
-
-    <!--PERMISOS -->
-    <record model="res.group" id="group_stock">
-          <field name="name">Nodux - Configuracion de Producto</field>
-    </record>
-    <record model="res.user-res.group" id="user_admin_group_stock">
-        <field name="user" ref="res.user_admin"/>
-        <field name="group" ref="group_stock"/>
-    </record>
-
-    <record model="res.user-res.group" id="user_trigger_group_stock">
-        <field name="user" ref="res.user_trigger"/>
-        <field name="group" ref="group_stock"/>
-    </record>
-
 </data>

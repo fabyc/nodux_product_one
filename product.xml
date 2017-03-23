@@ -41,6 +41,22 @@ this repository contains the full copyright notices and license terms. -->
             <field name="group" ref="group_cost_price"/>
         </record>
 
+        <record model="res.group" id="group_product_configuration">
+          <field name="name">Nodux - Configuracion de Productos</field>
+        </record>
+        <record model="res.user-res.group" id="user_admin_group_product_configuration">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_product_configuration"/>
+        </record>
 
+        <record model="res.user-res.group" id="user_trigger_group_product_configuration">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_product_configuration"/>
+        </record>
+
+        <record model="ir.ui.menu-res.group" id="menu_group_product_configuration">
+            <field name="menu" ref="product.menu_configuration"/>
+            <field name="group" ref="group_product_configuration"/>
+        </record>
     </data>
 </tryton>

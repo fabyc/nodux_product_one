@@ -28,5 +28,19 @@ this repository contains the full copyright notices and license terms. -->
             <field name="name">product_list_sale_line</field>
         </record>
 
+        <!--PERMISOS -->
+        <record model="res.group" id="group_cost_price">
+          <field name="name">Nodux - Precio de Costo</field>
+        </record>
+        <record model="res.user-res.group" id="user_admin_group_cost_price">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cost_price"/>
+        </record>
+        <record model="res.user-res.group" id="user_trigger_group_cost_price">
+            <field name="user" ref="res.user_admin"/>
+            <field name="group" ref="group_cost_price"/>
+        </record>
+
+
     </data>
 </tryton>

@@ -3,6 +3,13 @@
 this repository contains the full copyright notices and license terms. -->
 <data>
     <xpath
+        expr="/form/field[@name='active']"
+        position="after">
+        <field name="permission" invisible="1"/>
+        <newline/>
+    </xpath>
+
+    <xpath
         expr="/form/notebook/page[@id='general']"
         position="after">
         <page string="Accounting" col="4" id="accounting">
@@ -71,9 +78,24 @@ this repository contains the full copyright notices and license terms. -->
       <field name="default_uom_category" invisible="1"/>
       <newline/>
     </xpath>
-    
+
     <xpath expr="/form/notebook/page/field[@name='categories']"
       position="replace">
       <field name="categories" invisible="1"/>
     </xpath>
+
+    <!--PERMISOS -->
+    <record model="res.group" id="group_stock">
+          <field name="name">Nodux - Configuracion de Producto</field>
+    </record>
+    <record model="res.user-res.group" id="user_admin_group_stock">
+        <field name="user" ref="res.user_admin"/>
+        <field name="group" ref="group_stock"/>
+    </record>
+
+    <record model="res.user-res.group" id="user_trigger_group_stock">
+        <field name="user" ref="res.user_trigger"/>
+        <field name="group" ref="group_stock"/>
+    </record>
+
 </data>
